@@ -8,74 +8,248 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>🔒 密碼管理保險箱</title>
     <style>
-        /* 基礎設定 */
-        body { 
-            background: #121212; color: #E1E1E1; font-family: 'Segoe UI', sans-serif; 
-            padding: 15px; margin: 0; height: 100vh; display: flex; flex-direction: column; box-sizing: border-box;
+        body {
+            background: #121212;
+            color: #E1E1E1;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 15px;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
             overflow: hidden; /* 防止整個頁面捲動，只讓清單捲動 */
         }
-        .container { max-width: 600px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; height: 100%; }
-        h1 { color: #BB86FC; text-align: center; margin: 10px 0 20px; font-size: 24px; }
-        
-        /* 卡片設計 */
-        .card { background: #1E1E1E; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        label { color: #AAA; font-size: 12px; display: block; margin-bottom: 5px; }
-        input { 
-            width: 100%; background: #2C2C2C; border: 1px solid #333; padding: 12px; 
-            border-radius: 8px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 16px; 
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
-        input:focus { border-color: #BB86FC; outline: none; background: #333; }
-        .save-btn { 
-            width: 100%; background: #BB86FC; border: none; padding: 14px; 
-            border-radius: 8px; font-weight: bold; cursor: pointer; color: #000; font-size: 16px; 
+
+        h1 {
+            color: #BB86FC;
+            text-align: center;
+            margin: 10px 0 20px;
+            font-size: 24px;
+        }
+
+        /* 卡片設計 */
+        .card {
+            background: #1E1E1E;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        label {
+            color: #AAA;
+            font-size: 12px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            background: #2C2C2C;
+            border: 1px solid #333;
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+            input:focus {
+                border-color: #BB86FC;
+                outline: none;
+                background: #333;
+            }
+
+        .save-btn {
+            width: 100%;
+            background: #BB86FC;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #000;
+            font-size: 16px;
         }
 
         /* 關鍵：清單捲軸區塊 */
-        .list-card { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-        #listContainer { 
+        .list-card {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        #listContainer {
             overflow-y: scroll; /* 強制顯示捲軸方向 */
             flex-grow: 1;
             padding-right: 8px;
         }
 
-        /* 客製化捲軸樣式 (美化右手邊) */
-        #listContainer::-webkit-scrollbar { width: 6px; }
-        #listContainer::-webkit-scrollbar-track { background: #1A1A1A; border-radius: 10px; }
-        #listContainer::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
-        #listContainer::-webkit-scrollbar-thumb:hover { background: #BB86FC; }
+            /* 客製化捲軸樣式 (美化右手邊) */
+            #listContainer::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            #listContainer::-webkit-scrollbar-track {
+                background: #1A1A1A;
+                border-radius: 10px;
+            }
+
+            #listContainer::-webkit-scrollbar-thumb {
+                background: #444;
+                border-radius: 10px;
+            }
+
+                #listContainer::-webkit-scrollbar-thumb:hover {
+                    background: #BB86FC;
+                }
 
         /* 清單項目優化 */
-        .list-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px 10px; border-bottom: 1px solid #333; transition: 0.2s;
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 10px;
+            border-bottom: 1px solid #333;
+            transition: 0.2s;
         }
-        .site-info { cursor: pointer; flex-grow: 1; font-size: 16px; display: flex; align-items: center; }
-        .site-info::before { content: '🔑'; margin-right: 10px; font-size: 14px; }
-        .del-btn { color: #CF6679; background: none; border: 1px solid #CF6679; padding: 6px 12px; border-radius: 6px; font-size: 12px; }
+
+        .site-info {
+            cursor: pointer;
+            flex-grow: 1;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+            .site-info::before {
+                content: '🔑';
+                margin-right: 10px;
+                font-size: 14px;
+            }
+
+        .del-btn {
+            color: #CF6679;
+            background: none;
+            border: 1px solid #CF6679;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
 
         /* 補齊遺失的彈窗樣式 (重要！) */
-        .modal-overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; 
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
-        .modal-content { 
-            background: #252525; padding: 30px; border-radius: 15px; width: 85%; max-width: 350px; 
-            border: 1px solid #BB86FC; text-align: center; box-shadow: 0 0 20px rgba(187, 134, 252, 0.2);
+
+        .modal-content {
+            background: #252525;
+            padding: 30px;
+            border-radius: 15px;
+            width: 85%;
+            max-width: 350px;
+            border: 1px solid #BB86FC;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(187, 134, 252, 0.2);
         }
-        .modal-text { text-align: left; margin: 15px 0; background: #1A1A1A; padding: 15px; border-radius: 8px; line-height: 1.6; word-break: break-all; }
-        .modal-btn { background: #BB86FC; color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; margin: 5px; min-width: 80px; }
-        
+
+        .modal-text {
+            text-align: left;
+            margin: 15px 0;
+            background: #1A1A1A;
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.6;
+            word-break: break-all;
+        }
+
+        .modal-btn {
+            background: #BB86FC;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            min-width: 80px;
+        }
+
         /* Toast 通知 */
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #BB86FC; color: #000; padding: 10px 25px; border-radius: 50px; font-weight: bold; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; }
-        
-        .search-box { border-color: #BB86FC; border-width: 1.5px; margin-bottom: 10px; background: #1A1A1A; }
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #BB86FC;
+            color: #000;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        .search-box {
+            border-color: #BB86FC;
+            border-width: 1.5px;
+            margin-bottom: 10px;
+            background: #1A1A1A;
+        }
+
+        .backup-zone {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #444;
+        }
+
+        .secondary-btn {
+            flex: 1;
+            background: none;
+            border: 1px solid #BB86FC;
+            color: #BB86FC;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+            .secondary-btn:hover {
+                background: rgba(187, 134, 252, 0.1);
+            }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>🔒 密碼管理</h1>
-        
+
         <div class="card">
             <label>網站名稱</label><input type="text" id="site" autocomplete="off" placeholder="例如：元大">
             <label>帳號</label><input type="text" id="account" autocomplete="off">
@@ -88,10 +262,15 @@
                 <div style="border-left: 5px solid #BB86FC; padding-left: 12px; font-weight: bold;">我的密碼清單</div>
                 <div id="itemCount" style="font-size: 12px; color: #888;">0 筆紀錄</div>
             </div>
-            
+
             <input type="text" id="searchInput" class="search-box" placeholder="🔍 快速搜尋..." oninput="refreshList()">
-            
+
             <div id="listContainer"></div>
+            <div class="backup-zone">
+                <button class="secondary-btn" onclick="exportData()">📤 匯出備份</button>
+                <button class="secondary-btn" onclick="document.getElementById('importFile').click()">📥 匯入資料</button>
+            </div>
+            <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
         </div>
     </div>
 
@@ -147,20 +326,26 @@
         }
 
         function saveEntry() {
-            const s = document.getElementById('site'), a = document.getElementById('account'), p = document.getElementById('password');
-            if (!s.value || !a.value || !p.value) { showToast("請填寫所有欄位"); return; }
-            const name = s.value.trim();
-            localStorage.setItem(encodeKey(name), JSON.stringify({ account: a.value.trim(), password: p.value.trim() }));
-            let keys = JSON.parse(localStorage.getItem('__MASTER_KEYS__') || '[]');
-            if (!keys.includes(name)) {
-                keys.push(name);
-                localStorage.setItem('__MASTER_KEYS__', JSON.stringify(keys));
-            }
-            s.value = ''; a.value = ''; p.value = '';
-            s.focus();
-            showToast("儲存成功！");
-            refreshList();
-        }
+    const s = document.getElementById('site'), a = document.getElementById('account'), p = document.getElementById('password');
+    if (!s.value || !a.value || !p.value) { showToast("請填寫所有欄位"); return; }
+
+    const name = s.value.trim();
+    localStorage.setItem(encodeKey(name), JSON.stringify({ account: a.value.trim(), password: p.value.trim() }));
+
+    let keys = JSON.parse(localStorage.getItem('__MASTER_KEYS__') || '[]');
+    if (!keys.includes(name)) {
+        keys.push(name);
+        localStorage.setItem('__MASTER_KEYS__', JSON.stringify(keys));
+    }
+
+    s.value = ''; a.value = ''; p.value = '';
+
+    // 只有在「儲存」這個動作完成後，才主動要求 focus
+    s.focus();
+
+    showToast("儲存成功！");
+    refreshList();
+}
 
         function viewDetail(name) {
             const data = JSON.parse(localStorage.getItem(encodeKey(name)));
@@ -190,9 +375,65 @@
 
         function closeModals() {
             document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-            document.getElementById('site').focus();
         }
 
+// 匯出功能
+function exportData() {
+    const allKeys = JSON.parse(localStorage.getItem('__MASTER_KEYS__') || '[]');
+    const exportObj = {
+        __MASTER_KEYS__: allKeys,
+        data: {}
+    };
+
+    // 抓取每一筆加密過的詳細資料
+    allKeys.forEach(name => {
+        const encoded = encodeKey(name);
+        exportObj.data[encoded] = localStorage.getItem(encoded);
+    });
+
+    const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `my_vault_backup_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("匯出成功！");
+}
+
+// 匯入功能
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (!imported.__MASTER_KEYS__ || !imported.data) throw new Error("無效的格式");
+
+            // 合併 Master Keys (確保不重複)
+            let currentKeys = JSON.parse(localStorage.getItem('__MASTER_KEYS__') || '[]');
+            const newKeys = [...new Set([...currentKeys, ...imported.__MASTER_KEYS__])];
+            localStorage.setItem('__MASTER_KEYS__', JSON.stringify(newKeys));
+
+            // 寫入每一筆資料
+            for (let encodedKey in imported.data) {
+                localStorage.setItem(encodedKey, imported.data[encodedKey]);
+            }
+
+            showToast("匯入完成！");
+            refreshList();
+        } catch (err) {
+            showToast("匯入失敗：檔案格式錯誤");
+            console.error(err);
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // 清除 input 讓同個檔案可以重複觸發
+}
         window.onload = () => { refreshList(); document.getElementById('site').focus(); };
     </script>
 </body>
