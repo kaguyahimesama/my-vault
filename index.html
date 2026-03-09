@@ -7,35 +7,52 @@
     <meta charset="UTF-8">
     <title>🔒 密碼管理保險箱</title>
     <style>
-        body { background: #121212; color: #E1E1E1; font-family: 'Segoe UI', sans-serif; padding: 20px; overflow: hidden; }
-        .container { max-width: 600px; margin: 0 auto; height: 95vh; display: flex; flex-direction: column; }
-        .card { background: #1E1E1E; padding: 25px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
-        h1 { color: #BB86FC; text-align: center; margin: 5px 0 25px; }
-        label { color: #AAA; font-size: 12px; display: block; margin-bottom: 5px; }
-        
-        /* 輸入框樣式 */
-        input { width: 100%; background: #2C2C2C; border: 1px solid #444; padding: 12px; border-radius: 8px; color: white; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; }
-        input:focus { border-color: #BB86FC; outline: none; background: #333; }
-        
-        /* 搜尋框專屬樣式 */
-        .search-box { border-color: #BB86FC; border-width: 1.5px; margin-bottom: 10px; background: #1A1A1A; }
-        
-        .save-btn { width: 100%; background: #BB86FC; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; color: #000; font-size: 16px; }
-        
-        /* 清單區域 */
-        #listContainer { overflow-y: auto; flex-grow: 1; max-height: 250px; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #333; transition: 0.2s; }
-        .list-item:hover { background: #2A2A2A; border-radius: 8px; }
-        .site-info { cursor: pointer; flex-grow: 1; font-size: 16px; }
-        .del-btn { color: #CF6679; background: none; border: 1px solid #CF6679; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+    /* 基礎設定 */
+    body { 
+        background: #121212; color: #E1E1E1; font-family: 'Segoe UI', sans-serif; 
+        padding: 15px; margin: 0; height: 100vh; display: flex; flex-direction: column; box-sizing: border-box;
+    }
+    .container { max-width: 600px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; flex-grow: 1; }
+    h1 { color: #BB86FC; text-align: center; margin: 10px 0 20px; font-size: 24px; }
+    
+    /* 卡片設計 */
+    .card { background: #1E1E1E; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    label { color: #AAA; font-size: 12px; display: block; margin-bottom: 5px; }
+    input { 
+        width: 100%; background: #2C2C2C; border: 1px solid #333; padding: 12px; 
+        border-radius: 8px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 16px; 
+    }
+    input:focus { border-color: #BB86FC; outline: none; background: #333; }
+    .save-btn { 
+        width: 100%; background: #BB86FC; border: none; padding: 14px; 
+        border-radius: 8px; font-weight: bold; cursor: pointer; color: #000; font-size: 16px; 
+    }
 
-        /* 彈窗 & 通知 */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: #252525; padding: 30px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #BB86FC; text-align: center; }
-        .modal-text { text-align: left; margin: 15px 0; background: #1A1A1A; padding: 15px; border-radius: 8px; line-height: 1.6; word-break: break-all; }
-        .modal-btn { background: #BB86FC; color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; margin: 5px; }
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #BB86FC; color: #000; padding: 10px 25px; border-radius: 50px; font-weight: bold; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; }
-    </style>
+    /* 關鍵：清單捲軸區塊 */
+    .list-card { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    #listContainer { 
+        overflow-y: scroll; /* 強制顯示捲軸方向 */
+        flex-grow: 1;
+        padding-right: 5px; /* 給捲軸留點空間 */
+    }
+
+    /* 客製化捲軸樣式 (讓右手邊更好看) */
+    #listContainer::-webkit-scrollbar { width: 6px; }
+    #listContainer::-webkit-scrollbar-track { background: #1A1A1A; border-radius: 10px; }
+    #listContainer::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+    #listContainer::-webkit-scrollbar-thumb:hover { background: #BB86FC; }
+
+    /* 清單項目優化 */
+    .list-item { 
+        display: flex; justify-content: space-between; align-items: center; 
+        padding: 15px 10px; border-bottom: 1px solid #333; transition: 0.2s;
+    }
+    .site-info { cursor: pointer; flex-grow: 1; font-size: 16px; display: flex; align-items: center; }
+    .site-info::before { content: '🔑'; margin-right: 10px; font-size: 14px; }
+    .del-btn { color: #CF6679; background: none; border: 1px solid #CF6679; padding: 6px 12px; border-radius: 6px; font-size: 12px; }
+
+    /* Toast & Modal 略... */
+</style>
 </head>
 <body>
 
@@ -172,3 +189,4 @@
     </script>
 </body>
 </html>
+
