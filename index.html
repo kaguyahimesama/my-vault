@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>🔒 密碼管理保險箱</title>
+    <style>
+        body { background: #121212; color: #E1E1E1; font-family: 'Segoe UI', sans-serif; padding: 20px; overflow: hidden; }
+        .container { max-width: 600px; margin: 0 auto; height: 95vh; display: flex; flex-direction: column; }
+        .card { background: #1E1E1E; padding: 25px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
+        h1 { color: #BB86FC; text-align: center; margin: 5px 0 25px; }
+        label { color: #AAA; font-size: 12px; display: block; margin-bottom: 5px; }
+        
+        /* 輸入框樣式 */
+        input { width: 100%; background: #2C2C2C; border: 1px solid #444; padding: 12px; border-radius: 8px; color: white; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; }
+        input:focus { border-color: #BB86FC; outline: none; background: #333; }
+        
+        /* 搜尋框專屬樣式 */
+        .search-box { border-color: #BB86FC; border-width: 1.5px; margin-bottom: 10px; background: #1A1A1A; }
+        
+        .save-btn { width: 100%; background: #BB86FC; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; color: #000; font-size: 16px; }
+        
+        /* 清單區域 */
+        #listContainer { overflow-y: auto; flex-grow: 1; max-height: 250px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #333; transition: 0.2s; }
+        .list-item:hover { background: #2A2A2A; border-radius: 8px; }
+        .site-info { cursor: pointer; flex-grow: 1; font-size: 16px; }
+        .del-btn { color: #CF6679; background: none; border: 1px solid #CF6679; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+
+        /* 彈窗 & 通知 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #252525; padding: 30px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #BB86FC; text-align: center; }
+        .modal-text { text-align: left; margin: 15px 0; background: #1A1A1A; padding: 15px; border-radius: 8px; line-height: 1.6; word-break: break-all; }
+        .modal-btn { background: #BB86FC; color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; margin: 5px; }
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #BB86FC; color: #000; padding: 10px 25px; border-radius: 50px; font-weight: bold; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🔒 密碼管理</h1>
+        
+        <div class="card">
+            <label>網站名稱</label><input type="text" id="site" autocomplete="off" placeholder="例如：元大">
+            <label>帳號</label><input type="text" id="account" autocomplete="off">
+            <label>密碼</label><input type="text" id="password" autocomplete="off">
+            <button class="save-btn" onclick="saveEntry()">儲存</button>
+        </div>
+
+        <div class="card" style="flex-grow: 1; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="border-left: 5px solid #BB86FC; padding-left: 12px; font-weight: bold;">我的密碼清單</div>
+                <div id="itemCount" style="font-size: 12px; color: #888;">0 筆紀錄</div>
+            </div>
+            
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 快速搜尋..." oninput="refreshList()">
+            
+            <div id="listContainer"></div>
+        </div>
+    </div>
+
+    <div id="modalDetail" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="detailTitle" style="color:#BB86FC; margin-top:0;">詳細資料</h3>
+            <div id="detailBody" class="modal-text"></div>
+            <button class="modal-btn" id="copyBtn">複製密碼</button>
+            <button class="modal-btn" style="background:#444; color:white;" onclick="closeModals()">關閉</button>
+        </div>
+    </div>
+
+    <div id="modalConfirm" class="modal-overlay">
+        <div class="modal-content" style="border-color: #CF6679;">
+            <h3 style="color:#CF6679; margin-top:0;">確認刪除？</h3>
+            <p id="confirmText">確定要刪除這筆紀錄嗎？</p>
+            <button class="modal-btn" style="background:#CF6679; color:white;" id="finalDelBtn">刪除</button>
+            <button class="modal-btn" style="background:#444; color:white;" onclick="closeModals()">取消</button>
+        </div>
+    </div>
+
+    <div id="toast">已成功！</div>
+
+    <script>
+        let pendingDelName = "";
+        const encodeKey = (text) => btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, (m, p) => String.fromCharCode('0x' + p))).replace(/[/+=]/g, '_');
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.opacity = '1';
+            setTimeout(() => { t.style.opacity = '0'; }, 1500);
+        }
+
+        // 刷新清單，加入搜尋過濾邏輯
+        function refreshList() {
+            const container = document.getElementById('listContainer');
+            const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            container.innerHTML = '';
+            
+            const allKeys = JSON.parse(localStorage.getItem('__MASTER_KEYS__') || '[]');
+            
+            // 過濾符合搜尋條件的 Key
+            const filteredKeys = allKeys.filter(key => key.toLowerCase().includes(searchKeyword));
+            
+            document.getElementById('itemCount').innerText = `${filteredKeys.length} 筆紀錄`;
+
+            if (filteredKeys.length === 0) {
+                container.innerHTML = `<p style="color:#666; text-align:center; padding:20px;">${searchKeyword ? '找不到相符結果' : '目前無紀錄'}</p>`;
+                return;
+            }
+
+            filteredKeys.forEach(name => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<div class="site-info" onclick="viewDetail('${name}')">🔑 ${name}</div><button class="del-btn" onclick="askDelete('${name}')">刪除</button>`;
+                container.appendChild(div);
+            });
+        }
+
+        function saveEntry() {
+            const s = document.getElementById('site'), a = document.getElementById('account'), p = document.getElementById('password');
+            if (!s.value || !a.value || !p.value) { showToast("請填寫所有欄位"); return; }
+
+            const name = s.value.trim();
+            localStorage.setItem(encodeKey(name), JSON.stringify({ account: a.value.trim(), password: p.value.trim() }));
+            
+            let keys = JSON.parse(localStorage.getItem('__MASTER_KEYS__') || '[]');
+            if (!keys.includes(name)) {
+                keys.push(name);
+                localStorage.setItem('__MASTER_KEYS__', JSON.stringify(keys));
+            }
+
+            s.value = ''; a.value = ''; p.value = '';
+            s.focus();
+            showToast("儲存成功！");
+            refreshList();
+        }
+
+        // 其他 Modal 控制邏輯...
+        function viewDetail(name) {
+            const data = JSON.parse(localStorage.getItem(encodeKey(name)));
+            document.getElementById('detailTitle').innerText = name;
+            document.getElementById('detailBody').innerHTML = `<b>帳號：</b>${data.account}<br><b>密碼：</b>${data.password}`;
+            document.getElementById('modalDetail').style.display = 'flex';
+            document.getElementById('copyBtn').onclick = () => {
+                navigator.clipboard.writeText(data.password);
+                showToast("密碼已複製！");
+            };
+        }
+
+        function askDelete(name) {
+            pendingDelName = name;
+            document.getElementById('confirmText').innerText = `確定要永久刪除「${name}」嗎？`;
+            document.getElementById('modalConfirm').style.display = 'flex';
+        }
+
+        document.getElementById('finalDelBtn').onclick = () => {
+            localStorage.removeItem(encodeKey(pendingDelName));
+            let keys = JSON.parse(localStorage.getItem('__MASTER_KEYS__') || '[]').filter(k => k !== pendingDelName);
+            localStorage.setItem('__MASTER_KEYS__', JSON.stringify(keys));
+            closeModals();
+            showToast("已刪除");
+            refreshList();
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+            document.getElementById('site').focus();
+        }
+
+        window.onload = () => { refreshList(); document.getElementById('site').focus(); };
+    </script>
+</body>
+</html>
