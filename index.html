@@ -1,58 +1,75 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-   <meta name="apple-mobile-web-app-title" content="密碼保險箱">
-   <meta name="apple-mobile-web-app-capable" content="yes">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="密碼保險箱">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>🔒 密碼管理保險箱</title>
     <style>
-    /* 基礎設定 */
-    body { 
-        background: #121212; color: #E1E1E1; font-family: 'Segoe UI', sans-serif; 
-        padding: 15px; margin: 0; height: 100vh; display: flex; flex-direction: column; box-sizing: border-box;
-    }
-    .container { max-width: 600px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; flex-grow: 1; }
-    h1 { color: #BB86FC; text-align: center; margin: 10px 0 20px; font-size: 24px; }
-    
-    /* 卡片設計 */
-    .card { background: #1E1E1E; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    label { color: #AAA; font-size: 12px; display: block; margin-bottom: 5px; }
-    input { 
-        width: 100%; background: #2C2C2C; border: 1px solid #333; padding: 12px; 
-        border-radius: 8px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 16px; 
-    }
-    input:focus { border-color: #BB86FC; outline: none; background: #333; }
-    .save-btn { 
-        width: 100%; background: #BB86FC; border: none; padding: 14px; 
-        border-radius: 8px; font-weight: bold; cursor: pointer; color: #000; font-size: 16px; 
-    }
+        /* 基礎設定 */
+        body { 
+            background: #121212; color: #E1E1E1; font-family: 'Segoe UI', sans-serif; 
+            padding: 15px; margin: 0; height: 100vh; display: flex; flex-direction: column; box-sizing: border-box;
+            overflow: hidden; /* 防止整個頁面捲動，只讓清單捲動 */
+        }
+        .container { max-width: 600px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; height: 100%; }
+        h1 { color: #BB86FC; text-align: center; margin: 10px 0 20px; font-size: 24px; }
+        
+        /* 卡片設計 */
+        .card { background: #1E1E1E; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        label { color: #AAA; font-size: 12px; display: block; margin-bottom: 5px; }
+        input { 
+            width: 100%; background: #2C2C2C; border: 1px solid #333; padding: 12px; 
+            border-radius: 8px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 16px; 
+        }
+        input:focus { border-color: #BB86FC; outline: none; background: #333; }
+        .save-btn { 
+            width: 100%; background: #BB86FC; border: none; padding: 14px; 
+            border-radius: 8px; font-weight: bold; cursor: pointer; color: #000; font-size: 16px; 
+        }
 
-    /* 關鍵：清單捲軸區塊 */
-    .list-card { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-    #listContainer { 
-        overflow-y: scroll; /* 強制顯示捲軸方向 */
-        flex-grow: 1;
-        padding-right: 5px; /* 給捲軸留點空間 */
-    }
+        /* 關鍵：清單捲軸區塊 */
+        .list-card { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+        #listContainer { 
+            overflow-y: scroll; /* 強制顯示捲軸方向 */
+            flex-grow: 1;
+            padding-right: 8px;
+        }
 
-    /* 客製化捲軸樣式 (讓右手邊更好看) */
-    #listContainer::-webkit-scrollbar { width: 6px; }
-    #listContainer::-webkit-scrollbar-track { background: #1A1A1A; border-radius: 10px; }
-    #listContainer::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
-    #listContainer::-webkit-scrollbar-thumb:hover { background: #BB86FC; }
+        /* 客製化捲軸樣式 (美化右手邊) */
+        #listContainer::-webkit-scrollbar { width: 6px; }
+        #listContainer::-webkit-scrollbar-track { background: #1A1A1A; border-radius: 10px; }
+        #listContainer::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+        #listContainer::-webkit-scrollbar-thumb:hover { background: #BB86FC; }
 
-    /* 清單項目優化 */
-    .list-item { 
-        display: flex; justify-content: space-between; align-items: center; 
-        padding: 15px 10px; border-bottom: 1px solid #333; transition: 0.2s;
-    }
-    .site-info { cursor: pointer; flex-grow: 1; font-size: 16px; display: flex; align-items: center; }
-    .site-info::before { content: '🔑'; margin-right: 10px; font-size: 14px; }
-    .del-btn { color: #CF6679; background: none; border: 1px solid #CF6679; padding: 6px 12px; border-radius: 6px; font-size: 12px; }
+        /* 清單項目優化 */
+        .list-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 10px; border-bottom: 1px solid #333; transition: 0.2s;
+        }
+        .site-info { cursor: pointer; flex-grow: 1; font-size: 16px; display: flex; align-items: center; }
+        .site-info::before { content: '🔑'; margin-right: 10px; font-size: 14px; }
+        .del-btn { color: #CF6679; background: none; border: 1px solid #CF6679; padding: 6px 12px; border-radius: 6px; font-size: 12px; }
 
-    /* Toast & Modal 略... */
-</style>
+        /* 補齊遺失的彈窗樣式 (重要！) */
+        .modal-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; 
+        }
+        .modal-content { 
+            background: #252525; padding: 30px; border-radius: 15px; width: 85%; max-width: 350px; 
+            border: 1px solid #BB86FC; text-align: center; box-shadow: 0 0 20px rgba(187, 134, 252, 0.2);
+        }
+        .modal-text { text-align: left; margin: 15px 0; background: #1A1A1A; padding: 15px; border-radius: 8px; line-height: 1.6; word-break: break-all; }
+        .modal-btn { background: #BB86FC; color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; margin: 5px; min-width: 80px; }
+        
+        /* Toast 通知 */
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #BB86FC; color: #000; padding: 10px 25px; border-radius: 50px; font-weight: bold; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; }
+        
+        .search-box { border-color: #BB86FC; border-width: 1.5px; margin-bottom: 10px; background: #1A1A1A; }
+    </style>
 </head>
 <body>
 
@@ -66,7 +83,7 @@
             <button class="save-btn" onclick="saveEntry()">儲存</button>
         </div>
 
-        <div class="card" style="flex-grow: 1; display: flex; flex-direction: column;">
+        <div class="card list-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <div style="border-left: 5px solid #BB86FC; padding-left: 12px; font-weight: bold;">我的密碼清單</div>
                 <div id="itemCount" style="font-size: 12px; color: #888;">0 筆紀錄</div>
@@ -108,17 +125,12 @@
             setTimeout(() => { t.style.opacity = '0'; }, 1500);
         }
 
-        // 刷新清單，加入搜尋過濾邏輯
         function refreshList() {
             const container = document.getElementById('listContainer');
             const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
             container.innerHTML = '';
-            
             const allKeys = JSON.parse(localStorage.getItem('__MASTER_KEYS__') || '[]');
-            
-            // 過濾符合搜尋條件的 Key
             const filteredKeys = allKeys.filter(key => key.toLowerCase().includes(searchKeyword));
-            
             document.getElementById('itemCount').innerText = `${filteredKeys.length} 筆紀錄`;
 
             if (filteredKeys.length === 0) {
@@ -129,7 +141,7 @@
             filteredKeys.forEach(name => {
                 const div = document.createElement('div');
                 div.className = 'list-item';
-                div.innerHTML = `<div class="site-info" onclick="viewDetail('${name}')">🔑 ${name}</div><button class="del-btn" onclick="askDelete('${name}')">刪除</button>`;
+                div.innerHTML = `<div class="site-info" onclick="viewDetail('${name}')">${name}</div><button class="del-btn" onclick="askDelete('${name}')">刪除</button>`;
                 container.appendChild(div);
             });
         }
@@ -137,23 +149,19 @@
         function saveEntry() {
             const s = document.getElementById('site'), a = document.getElementById('account'), p = document.getElementById('password');
             if (!s.value || !a.value || !p.value) { showToast("請填寫所有欄位"); return; }
-
             const name = s.value.trim();
             localStorage.setItem(encodeKey(name), JSON.stringify({ account: a.value.trim(), password: p.value.trim() }));
-            
             let keys = JSON.parse(localStorage.getItem('__MASTER_KEYS__') || '[]');
             if (!keys.includes(name)) {
                 keys.push(name);
                 localStorage.setItem('__MASTER_KEYS__', JSON.stringify(keys));
             }
-
             s.value = ''; a.value = ''; p.value = '';
             s.focus();
             showToast("儲存成功！");
             refreshList();
         }
 
-        // 其他 Modal 控制邏輯...
         function viewDetail(name) {
             const data = JSON.parse(localStorage.getItem(encodeKey(name)));
             document.getElementById('detailTitle').innerText = name;
@@ -178,7 +186,7 @@
             closeModals();
             showToast("已刪除");
             refreshList();
-        }
+        };
 
         function closeModals() {
             document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
@@ -189,4 +197,3 @@
     </script>
 </body>
 </html>
-
